@@ -1,0 +1,220 @@
+ABOUT MY SHELL:
+
+/*
+
+I have implemented a basic LINUX/UNIX shell.
+Environment used - UBUNTU 20.04
+Compiler for the C code - GCC
+
+*/
+
+Shell implements "Internal commands" and "External Commands"
+
+Internal commands implemented - 
+#1-cd
+#2-pwd
+#3-exit
+#4-echo
+#5-history
+
+External commands implemented -
+#1-ls
+#2-rm
+#3-mkdir
+#4-cat
+#5-date
+
+The internal  commands are handled by the parent process and for external commands we have used execv() system call which creates a new process on the memory of child process.
+
+/*
+In the parent process we have specified the path of ./Exec executable file so that when working directory is changed our execv() system call don't fail(due to being not able to find the location of ./Exec).
+
+Example- char *args[]={"/home/varun/AssignmentOS/./Exec",inputCopy,cwd,NULL}; 
+         execvp(args[0],args);
+ 
+*/
+
+/*
+Also the use of 2 flags in a single command is not handled.
+*/
+
+-----------------------------------------------------------------------------------------------------------------------
+
+<<Description about the "internal commands" >>
+
+#1 - echo:
+
+Options implemented-
+	1)echo Output -- this simply prints the string to terminal
+	2)echo -n Output -- this omits the endline character and prints the string
+	3)echo * -- this prints the list of all the files in the present working directory(all the names are in single line)
+
+Errors handled-
+	@If more options are provided to echo it skips printing the output and terminates from if condition.
+	@If both flags are used in same line then the other flag is treated as part of string to be outputted.
+	@If wrong spelling is used for the flag then it is considered as part of the string.
+	
+#2 - history:
+
+Options implemented-
+	1)history -- this prints the history of all the commands along with serial number
+	2)history -c --this clears the list of all the histories till now.
+	3)history --help --this prints the options and detail about the history command
+	
+Errors handled-
+	@If wrong argument are specified then it skips it and prints message regarding it.
+	@If flag name is wrong then also it skips it and prints message regarding it.
+	
+Assumptions - I have only considered those as history which are the part of running program. I haven't stored commands that were part of the previous processes.(this could be implemented further in development by just adding a text file to store our commands)
+	
+#3 - exit:
+
+Options implemented-
+	1)exit -- this exits from the parent program with the status of "0"
+	2)exit exit_status -- this exits the parent program with the status "exit_status"
+
+Errors handled-
+	@If no argument to exit is provided then it exits with status 0
+	@If the argument provided is not an integer then it displays error message to the terminal.
+	@If the case of letters is different then the format then it displays invalid command.
+	
+#4 - cd:
+
+Options implemented-
+	1)cd dir1/dir2/dir3 -- this changes the current directory to the specified directory if possible
+	2)cd dir1\dir2\dir3 -- this also does the same job as above...so we can specify as '/' or '\' (both would work the same)
+	3)cd --help -- this prints out the options in cd along with some other details as well		
+	4)cd -L -- this is the deault cd command same as cd dir1/dir2 (it forces symbolic links)
+
+Errors handled -
+	@If both the flags are provided then it considers the other as a directory provided that no directory is specified after that.
+	@If wrong flag is specified it shows a message
+	
+#5 - pwd:
+
+Options implemented-
+	1)pwd -- prints the present working directory
+	2)pwd -L -- it is same as above...it prints directory with symbolic links
+	3)pwd --help -- this prints out the options in pwd that I have implemented alon with some other details as well.
+
+Errors handles - 
+	@If wrong flags are provided then it skips it with an error message up on the screen
+	@If more than required arguments are passed then it displays error message
+	@If name used is wrong then also it displays an error result.
+
+-------------------------------------------------------------------------------------------------------------------------------
+	
+<<Description about the "external commands" >>
+
+#1 rm:
+
+Options implemented-
+	1)rm -f file.txt p1.c -- this forcefully deletes all the files specified to it, it doesn't deletes the directories specified
+	2)rm file.txt p.c -- this is default implementation of the rm command.
+	3)rm -i file.txt r2.txt -- this prompts user to enter each time whether they want to delete the file or not.
+
+Errors handled -
+	@If wrong name is specified then it displays message to the screen.
+	@If user provides a directory as one of the argument, then we don't delete it.
+	@If wrong flags are provided then it considers it as name of files.
+	@If no such file exists then it displays the message.
+
+#2 mkdir:
+
+Options implemented-
+	1)mkdir a/b c -- this creates directory 'b' within directory 'a' if directory 'a' exists and also it creates directory 'c'.
+	2)mkdir -v a -- this creates directory 'a' and prints the message that it is created
+	3)mkdir -p a/b -- this creates directory 'b' within directory 'a' and if 'a' is not present then it firstly creates 'a' and then 'b'
+
+Errors handled - 
+	@If wrong flag is supplied then it is treated as a directory to be created.
+	@If with -v flag a directory like a/b is specified where 'a' doesn't exist then it shows appropriate message
+	@And all the appropriate messages related to mkdir command are displayed accordingly.
+	
+#3 cat:
+
+Options implemented-
+	1)cat t1.txt t2.txt -- this displays the contents of the files in order('t1.txt' first and then 't2.txt') to the terminal
+	2)cat -n t1.txt t2.txt -- this displays the contents of files along with line counter.
+	3)cat -E t1.txt t2.txt -- this adds '$' in place of '\n' and then displays the contents of the files.
+
+Errors handled-
+	@If a different flag is used then it is treated as a file and appropriate messages are shown.
+	@If more flags are supplied then the latter flag is treated as a file
+	@And all the appropriate messages like 'file not found' are displayed.	  	
+
+
+#4 date:
+
+Options implemented-
+	1)date -- this prints the date in default format
+	2)date -u -- this prints the UTC time
+	3)date --date="tomorrow" -- this prints the date and time of the next day
+
+Assumption- For (3) command do not use <space> between " --date="tomorrow" "
+
+Errors handled-
+	@If more number of arguments are specified then it displays appropriate message.
+	@If wrong flag is supplied then also it shows a message.
+	
+#5 ls:
+
+Options implemented-
+	1)ls -- prints all the files present in current directory
+	2)ls -1 -- prints name of all the files in single line each.
+	3)ls -s -- prints the name of files along with its block size and in the end it prints the total block size of every file in that directory.
+
+Errors handled:
+	@If wrong number of arguments are provided then it shows an error message on the terminal
+	@If the flag used are wrong then also it displays an error message. 
+	
+------------------------------------------------------------------------------------------------------------------------------
+
+Now, some general errors handled are:-
+
+##If user doesn't input anything and presses <enter> then option for entering a command again pops up.
+##If the command name doesn't exist then it shows appropriate message regarding it.
+##If somehow external command fails then the parent process won't be affected.
+##If there is a <space> at the beginning of the command then our code trims it, and then displays the output.(otherwise there are chances of segmentation fault)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
